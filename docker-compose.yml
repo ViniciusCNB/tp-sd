@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+  servidor:
+    build:
+      context: .
+      dockerfile: Dockerfile.servidor
+    networks:
+      cristian_net:
+        ipv4_address: 172.20.0.2
+    environment:
+      - HOST=0.0.0.0
+    command: python servidor_ntp.py
+
+  cliente1:
+    build:
+      context: .
+      dockerfile: Dockerfile.cliente
+    networks:
+      cristian_net:
+        ipv4_address: 172.20.0.3
+    depends_on:
+      - servidor
+    command: python cliente_cristian.py 1
+
+  cliente2:
+    build:
+      context: .
+      dockerfile: Dockerfile.cliente
+    networks:
+      cristian_net:
+        ipv4_address: 172.20.0.4
+    depends_on:
+      - servidor
+    command: python cliente_cristian.py 2
+
+  cliente3:
+    build:
+      context: .
+      dockerfile: Dockerfile.cliente
+    networks:
+      cristian_net:
+        ipv4_address: 172.20.0.5
+    depends_on:
+      - servidor
+    command: python cliente_cristian.py 3
+
+  cliente4:
+    build:
+      context: .
+      dockerfile: Dockerfile.cliente
+    networks:
+      cristian_net:
+        ipv4_address: 172.20.0.6
+    depends_on:
+      - servidor
+    command: python cliente_cristian.py 4
+
+networks:
+  cristian_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16 
