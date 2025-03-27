@@ -13,8 +13,10 @@ class ClienteCristian:
         self.host_servidor = host_servidor
         self.porta_servidor = porta_servidor
         self.id_cliente = id_cliente
-        self.tempo_local = time.time()
-        self.ajuste = 0  # Diferença entre tempo local e servidor
+        self.ajuste_total = 0  # Ajuste acumulado total
+        self.ajuste_atual = 0  # Ajuste necessário na sincronização atual
+        self.deriva_relogio = 0  # Taxa de deriva do relógio (segundos/minuto)
+        self.ultima_sincronizacao = time.time()
 
     def obter_tempo_servidor(self):
         """Implementa o algoritmo de Cristian para sincronização."""
@@ -30,7 +32,11 @@ class ClienteCristian:
             socket_cliente.send(b"GET_TIME")
 
             # Recebe resposta do servidor
-            tempo_servidor = float(socket_cliente.recv(1024).decode())
+            resposta = socket_cliente.recv(1024).decode()
+            if not resposta:
+                raise Exception("Resposta vazia do servidor")
+
+            tempo_servidor = float(resposta)
 
             # Registra tempo de recebimento
             t1 = time.time()
@@ -39,16 +45,42 @@ class ClienteCristian:
             rtt = t1 - t0
             delay = rtt / 2
 
-            # Calcula o novo tempo ajustado
-            tempo_ajustado = tempo_servidor + delay
+            # Calcula o tempo do servidor ajustado pelo delay
+            tempo_servidor_ajustado = tempo_servidor + delay
 
-            # Calcula o ajuste necessário
-            self.ajuste = tempo_ajustado - time.time()
+            # Calcula o tempo local sem ajustes
+            tempo_local_bruto = time.time()
+
+            # Calcula o novo ajuste necessário
+            self.ajuste_atual = tempo_servidor_ajustado - tempo_local_bruto
+
+            # Calcula a deriva do relógio se não for a primeira sincronização
+            tempo_desde_ultima = tempo_local_bruto - self.ultima_sincronizacao
+            if tempo_desde_ultima > 0:
+                deriva_observada = (self.ajuste_atual - self.ajuste_total) / (
+                    tempo_desde_ultima / 60
+                )
+                # Atualiza a deriva com um fator de suavização
+                if self.deriva_relogio == 0:
+                    self.deriva_relogio = deriva_observada
+                else:
+                    self.deriva_relogio = (
+                        0.7 * self.deriva_relogio + 0.3 * deriva_observada
+                    )
+
+            # Aplica o ajuste imediatamente
+            self.ajuste_total = self.ajuste_atual
+
+            # Armazena o tempo desta sincronização
+            self.ultima_sincronizacao = tempo_local_bruto
 
             print(f"Cliente {self.id_cliente}:")
             print(f"RTT: {rtt:.6f} segundos")
             print(f"Delay estimado: {delay:.6f} segundos")
-            print(f"Ajuste necessário: {self.ajuste:.6f} segundos")
+            print(f"Ajuste necessário: {self.ajuste_atual:.6f} segundos")
+            print(f"Deriva do relógio: {self.deriva_relogio:.6f} segundos/minuto")
+            print(f"Tempo do servidor: {time.ctime(tempo_servidor)}")
+            print(f"Tempo ajustado: {time.ctime(tempo_servidor_ajustado)}")
 
             socket_cliente.close()
             return True
@@ -57,18 +89,21 @@ class ClienteCristian:
             print(f"Erro ao sincronizar com servidor: {e}")
             return False
 
-    def ajustar_tempo_gradualmente(self):
-        """Ajusta o tempo local gradualmente para evitar saltos bruscos."""
-        if abs(self.ajuste) > 0:
-            # Ajusta 10% da diferença a cada segundo
-            ajuste_por_segundo = self.ajuste * 0.1
-            self.tempo_local += ajuste_por_segundo
-            self.ajuste -= ajuste_por_segundo
+    def obter_tempo_atual(self):
+        """Retorna o tempo atual ajustado."""
+        # Calcula o tempo desde a última sincronização
+        tempo_desde_sincronizacao = time.time() - self.ultima_sincronizacao
+
+        # Aplica o ajuste básico mais uma compensação pela deriva do relógio
+        compensacao_deriva = (tempo_desde_sincronizacao / 60) * self.deriva_relogio
+        tempo_ajustado = time.time() + self.ajuste_total - compensacao_deriva
+
+        return tempo_ajustado
 
     def mostrar_tempo(self):
         """Mostra o tempo local atual."""
         while True:
-            tempo_atual = time.time() + self.ajuste
+            tempo_atual = self.obter_tempo_atual()
             print(
                 f"Cliente {self.id_cliente} - "
                 f"Tempo local: {time.ctime(tempo_atual)}"
@@ -84,11 +119,7 @@ class ClienteCristian:
 
         # Loop principal de sincronização
         while True:
-            if self.obter_tempo_servidor():
-                # Ajusta o tempo gradualmente por 10 segundos
-                for _ in range(10):
-                    self.ajustar_tempo_gradualmente()
-                    time.sleep(1)
+            self.obter_tempo_servidor()
             time.sleep(60)  # Espera 60 segundos antes da próxima sincronização
 
 
