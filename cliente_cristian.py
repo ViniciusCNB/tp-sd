@@ -78,7 +78,6 @@ class ClienteCristian:
             print(f"RTT: {rtt:.6f} segundos")
             print(f"Delay estimado: {delay:.6f} segundos")
             print(f"Ajuste necessário: {self.ajuste_atual:.6f} segundos")
-            print(f"Deriva do relógio: {self.deriva_relogio:.6f} segundos/minuto")
             print(f"Tempo do servidor: {time.ctime(tempo_servidor)}")
             print(f"Tempo ajustado: {time.ctime(tempo_servidor_ajustado)}")
 
