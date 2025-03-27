@@ -5,6 +5,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+ENV PYTHONUNBUFFERED=1
+
 COPY cliente_cristian.py .
 
 CMD ["python", "cliente_cristian.py"] 

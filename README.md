@@ -18,12 +18,12 @@ docker-compose up --build
 ```
 
 Isso irá criar:
-- 1 servidor NTP (IP: 172.20.0.2)
+- 1 servidor NTP (IP: 172.0.0.2)
 - 4 clientes com IPs distintos:
-  - Cliente 1 (IP: 172.20.0.3)
-  - Cliente 2 (IP: 172.20.0.4)
-  - Cliente 3 (IP: 172.20.0.5)
-  - Cliente 4 (IP: 172.20.0.6)
+  - Cliente 1 (IP: 172.0.0.3)
+  - Cliente 2 (IP: 172.0.0.4)
+  - Cliente 3 (IP: 172.0.0.5)
+  - Cliente 4 (IP: 172.0.0.6)
 
 ## Execução Local (Alternativa)
 

@@ -6,7 +6,7 @@ import threading
 class ClienteCristian:
     def __init__(
         self,
-        host_servidor="172.20.0.2",
+        host_servidor="172.0.0.2",
         porta_servidor=5000,
         id_cliente=1
     ):
@@ -73,7 +73,7 @@ class ClienteCristian:
                 f"Cliente {self.id_cliente} - "
                 f"Tempo local: {time.ctime(tempo_atual)}"
             )
-            time.sleep(1)
+            time.sleep(60)  # Mostra o tempo a cada 60 segundos
 
     def iniciar(self):
         """Inicia o cliente."""
@@ -89,7 +89,7 @@ class ClienteCristian:
                 for _ in range(10):
                     self.ajustar_tempo_gradualmente()
                     time.sleep(1)
-            time.sleep(5)  # Espera 5 segundos antes da próxima sincronização
+            time.sleep(60)  # Espera 60 segundos antes da próxima sincronização
 
 
 if __name__ == "__main__":

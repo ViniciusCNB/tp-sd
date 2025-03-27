@@ -7,10 +7,17 @@ services:
       dockerfile: Dockerfile.servidor
     networks:
       cristian_net:
-        ipv4_address: 172.20.0.2
+        ipv4_address: 172.0.0.2
     environment:
       - HOST=0.0.0.0
     command: python servidor_ntp.py
+    tty: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
 
   cliente1:
     build:
@@ -18,10 +25,17 @@ services:
       dockerfile: Dockerfile.cliente
     networks:
       cristian_net:
-        ipv4_address: 172.20.0.3
+        ipv4_address: 172.0.0.3
     depends_on:
       - servidor
     command: python cliente_cristian.py 1
+    tty: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
 
   cliente2:
     build:
@@ -29,10 +43,17 @@ services:
       dockerfile: Dockerfile.cliente
     networks:
       cristian_net:
-        ipv4_address: 172.20.0.4
+        ipv4_address: 172.0.0.4
     depends_on:
       - servidor
     command: python cliente_cristian.py 2
+    tty: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
 
   cliente3:
     build:
@@ -40,10 +61,17 @@ services:
       dockerfile: Dockerfile.cliente
     networks:
       cristian_net:
-        ipv4_address: 172.20.0.5
+        ipv4_address: 172.0.0.5
     depends_on:
       - servidor
     command: python cliente_cristian.py 3
+    tty: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
 
   cliente4:
     build:
@@ -51,14 +79,20 @@ services:
       dockerfile: Dockerfile.cliente
     networks:
       cristian_net:
-        ipv4_address: 172.20.0.6
+        ipv4_address: 172.0.0.6
     depends_on:
       - servidor
     command: python cliente_cristian.py 4
+    tty: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
 networks:
   cristian_net:
     ipam:
       driver: default
       config:
-        - subnet: 172.20.0.0/16 
+        - subnet: 172.0.0.0/16 
